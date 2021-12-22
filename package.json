@@ -5,7 +5,10 @@
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
-		"build": "node esbuild.config.mjs production"
+		"build": "node esbuild.config.mjs production",
+		"copy": "npm run build && cp ./{main.js,versions.json,manifest.json} '/Users/finnvoorhees/Library/Mobile Documents/iCloud~md~obsidian/Documents/Notes/.obsidian/plugins/obsidian-shortcut-launcher-build/'",
+		"clear": "rm /Users/finnvoorhees/Library/Mobile\\ Documents/iCloud~md~obsidian/Documents/Notes/.obsidian/plugins/obsidian-shortcut-launcher-build/*",
+		"zip": "npm run build && zip obsidian-shortcut-launcher.zip main.js versions.json manifest.json"
 	},
 	"keywords": [],
 	"author": "",
