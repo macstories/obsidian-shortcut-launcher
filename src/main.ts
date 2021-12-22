@@ -1,15 +1,7 @@
-import { match, throws } from "assert";
 import {
-	App,
-	Editor,
-	MarkdownView,
-	Modal,
 	Notice,
 	Plugin,
-	PluginSettingTab,
-	Setting,
 } from "obsidian";
-import { LauncherModal } from "./LauncherModal";
 import { SettingsTab } from "./SettingsTab";
 
 declare module "obsidian" {
@@ -33,13 +25,7 @@ interface ShortcutLauncherPluginSettings {
 }
 
 const DEFAULT_SETTINGS: ShortcutLauncherPluginSettings = {
-	launchers: [
-		{
-			commandName: "Command Test",
-			shortcutName: "My Shortcut",
-			inputType: "Selected Text",
-		},
-	],
+	launchers: [],
 };
 
 export default class ShortcutLauncherPlugin extends Plugin {

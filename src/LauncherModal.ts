@@ -1,4 +1,4 @@
-import { App, ButtonComponent, Modal, Notice, Setting } from "obsidian";
+import { App, Modal, Notice, Setting } from "obsidian";
 
 export class LauncherModal extends Modal {
 	isEditing: boolean;
@@ -68,8 +68,8 @@ export class LauncherModal extends Modal {
 						"Selected Text": "Selected Text",
 						"Current Paragraph": "Current Paragraph",
 						"Entire Document": "Entire Document",
-						"Clipboard": "Clipboard",
-						"None": "None",
+						Clipboard: "Clipboard",
+						None: "None",
 					})
 					.setValue(this.inputType)
 					.onChange((value) => (this.inputType = value))
