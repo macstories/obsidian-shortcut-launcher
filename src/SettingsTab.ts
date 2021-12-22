@@ -74,7 +74,7 @@ export class SettingsTab extends PluginSettingTab {
 					})
 				)
 				.addButton((button) =>
-					button.setIcon("trash").onClick(() => {
+					button.setIcon("trash").setWarning().onClick(() => {
 						this.plugin.settings.launchers.splice(index, 1);
 						this.plugin.saveSettings();
 						this.display();
