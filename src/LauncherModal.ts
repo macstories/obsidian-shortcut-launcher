@@ -68,6 +68,8 @@ export class LauncherModal extends Modal {
 						"Selected Text": "Selected Text",
 						"Current Paragraph": "Current Paragraph",
 						"Entire Document": "Entire Document",
+						"Link to Document": "Link to Document",
+						"Selected Link/Embed Contents": "Selected Link/Embed Contents",
 						Clipboard: "Clipboard",
 						None: "None",
 					})
