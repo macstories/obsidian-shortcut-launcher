@@ -27,12 +27,14 @@ export class SettingsTab extends PluginSettingTab {
 						false,
 						"",
 						"",
-						"Selected Text",
-						(commandName, shortcutName, inputType) => {
+						["Selected Text"],
+						",",
+						(commandName, shortcutName, inputTypes, separator) => {
 							this.plugin.settings.launchers.splice(0, 0, {
 								commandName: commandName,
 								shortcutName: shortcutName,
-								inputType: inputType,
+								inputTypes: inputTypes,
+								separator: separator
 							});
 							this.plugin.saveSettings();
 							this.display();
@@ -45,9 +47,7 @@ export class SettingsTab extends PluginSettingTab {
 			new Setting(containerEl)
 				.setName(launcher.commandName)
 				.setDesc(
-					`${launcher.shortcutName}${
-						launcher.inputType == "None" ? "" : " < "
-					}${launcher.inputType == "None" ? "" : launcher.inputType}`
+					`${launcher.shortcutName} < ${launcher.inputTypes[0]}`
 				)
 				.addButton((button) =>
 					button.setIcon("pencil").onClick((event) => {
@@ -56,8 +56,9 @@ export class SettingsTab extends PluginSettingTab {
 							true,
 							launcher.commandName,
 							launcher.shortcutName,
-							launcher.inputType,
-							(commandName, shortcutName, inputType) => {
+							launcher.inputTypes,
+							launcher.separator,
+							(commandName, shortcutName, inputTypes, separator) => {
 								this.plugin.settings.launchers[
 									index
 								].commandName = commandName;
@@ -66,7 +67,10 @@ export class SettingsTab extends PluginSettingTab {
 								].shortcutName = shortcutName;
 								this.plugin.settings.launchers[
 									index
-								].inputType = inputType;
+								].inputTypes = inputTypes;
+								this.plugin.settings.launchers[
+									index
+								].separator = separator;
 								this.plugin.saveSettings();
 								this.display();
 							}
@@ -74,11 +78,14 @@ export class SettingsTab extends PluginSettingTab {
 					})
 				)
 				.addButton((button) =>
-					button.setIcon("trash").setWarning().onClick(() => {
-						this.plugin.settings.launchers.splice(index, 1);
-						this.plugin.saveSettings();
-						this.display();
-					})
+					button
+						.setIcon("trash")
+						.setWarning()
+						.onClick(() => {
+							this.plugin.settings.launchers.splice(index, 1);
+							this.plugin.saveSettings();
+							this.display();
+						})
 				);
 		});
 	}

@@ -4,12 +4,14 @@ export class LauncherModal extends Modal {
 	isEditing: boolean;
 	commandName: string;
 	shortcutName: string;
-	inputType: string;
+	inputTypes: string[];
+	separator: string;
 
 	onSave: (
 		commandName: string,
 		shortcutName: string,
-		inputType: string
+		inputTypes: string[],
+		separator: string
 	) => void;
 
 	constructor(
@@ -17,23 +19,28 @@ export class LauncherModal extends Modal {
 		isEditing: boolean,
 		commandName: string,
 		shortcutName: string,
-		inputType: string,
+		inputTypes: string[],
+		separator: string,
 		onSave: (
 			commandName: string,
 			shortcutName: string,
-			inputType: string
+			inputTypes: string[],
+			separator: string
 		) => void
 	) {
 		super(app);
 		this.isEditing = isEditing;
 		this.commandName = commandName;
 		this.shortcutName = shortcutName;
-		this.inputType = inputType;
+		this.inputTypes = inputTypes;
+		this.separator = separator
 		this.onSave = onSave;
 	}
 
 	onOpen() {
 		const { contentEl } = this;
+
+		contentEl.empty();
 
 		contentEl.createEl("h2", {
 			text: this.isEditing ? "Edit Launcher" : "New Launcher",
@@ -69,13 +76,72 @@ export class LauncherModal extends Modal {
 						"Current Paragraph": "Current Paragraph",
 						"Entire Document": "Entire Document",
 						"Link to Document": "Link to Document",
-						"Selected Link/Embed Contents": "Selected Link/Embed Contents",
-						Clipboard: "Clipboard",
-						None: "None",
+						"Selected Link/Embed Contents":
+							"Selected Link/Embed Contents",
+						Multiple: "Multiple",
 					})
-					.setValue(this.inputType)
-					.onChange((value) => (this.inputType = value))
+					.setValue(this.inputTypes[0])
+					.onChange((value) => {
+						if (value == "Multiple") {
+							this.inputTypes = ["Multiple", "Selected Text", "Current Paragraph"]
+						} else {
+							this.inputTypes = [value]
+						}
+						this.onOpen()
+					})
 			);
+
+		if (this.inputTypes.length > 1) {
+			this.inputTypes.filter((_, index) => index > 0).forEach((inputType, index) => {
+				let setting = new Setting(contentEl)
+					.setName(`Input Type #${index + 1}`)
+					.addDropdown((dropdown) =>
+						dropdown
+							.addOptions({
+								"Selected Text": "Selected Text",
+								"Current Paragraph": "Current Paragraph",
+								"Entire Document": "Entire Document",
+								"Link to Document": "Link to Document",
+								"Selected Link/Embed Contents":
+									"Selected Link/Embed Contents",
+							})
+							.setValue(inputType)
+							.onChange((value) => {
+								this.inputTypes[index + 1] = value
+							})
+					)
+				if (index > 1) {
+					setting
+						.addButton((button) =>
+							button
+								.setIcon("trash")
+								.setWarning()
+								.onClick(() => {
+									this.inputTypes.splice(index + 1, 1);
+									this.onOpen();
+								})
+						);
+				}
+			})
+			
+			new Setting(contentEl).addButton((button) => 
+				button
+					.setButtonText("Add Input")
+					.onClick(() => {
+						this.inputTypes.push("Selected Text")
+						this.onOpen()
+					})
+			)
+
+			new Setting(contentEl)
+				.setName("Separator")
+				.setDesc("The separator to insert between input types.")
+				.addText((text) =>
+					text
+						.setValue(",")
+						.onChange((value) => (this.separator = value))
+				);
+		}
 
 		new Setting(contentEl).addButton((button) =>
 			button
@@ -91,7 +157,8 @@ export class LauncherModal extends Modal {
 					this.onSave(
 						this.commandName,
 						this.shortcutName,
-						this.inputType
+						this.inputTypes,
+						this.separator
 					);
 					this.close();
 				})

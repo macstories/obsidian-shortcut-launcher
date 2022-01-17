@@ -20,7 +20,8 @@ declare module "obsidian" {
 interface Launcher {
 	commandName: string;
 	shortcutName: string;
-	inputType: string;
+	inputTypes: string[];
+	separator: string;
 }
 
 interface ShortcutLauncherPluginSettings {
@@ -42,41 +43,24 @@ export default class ShortcutLauncherPlugin extends Plugin {
 
 	async createCommands() {
 		this.settings.launchers.forEach((launcher, index) => {
-			if (["Clipboard", "None"].contains(launcher.inputType)) {
-				this.addCommand({
-					id: `${index}`,
-					name: launcher.commandName,
-					callback: () => {
-						if (launcher.inputType == "Clipboard") {
-							window.open(
-								`shortcuts://run-shortcut?name=${encodeURIComponent(
-									launcher.shortcutName
-								)}&input=clipboard`
-							);
-						} else if (launcher.inputType == "None") {
-							window.open(
-								`shortcuts://run-shortcut?name=${encodeURIComponent(
-									launcher.shortcutName
-								)}`
-							);
-						}
-					},
-				});
-			} else {
-				this.addCommand({
-					id: `${index}`,
-					name: launcher.commandName,
-					editorCallback: async (editor) => {
+			this.addCommand({
+				id: `${index}`,
+				name: launcher.commandName,
+				editorCallback: async (editor) => {
+					var inputs: string[] = []
+
+					await launcher.inputTypes.filter((inputType) => inputType != "Multiple").reduce(async (promise, inputType) => {
+						await promise;
 						var text = "";
-						if (launcher.inputType == "Selected Text") {
+						if (inputType == "Selected Text") {
 							text = editor.getSelection();
-						} else if (launcher.inputType == "Current Paragraph") {
+						} else if (inputType == "Current Paragraph") {
 							let metadataCache =
 								this.app.metadataCache.getFileCache(
 									this.app.workspace.getActiveFile()
 								);
 							if (!metadataCache.sections) {
-								return new Notice(
+								new Notice(
 									"Could not find current paragraph"
 								);
 							}
@@ -99,22 +83,22 @@ export default class ShortcutLauncherPlugin extends Plugin {
 									matchingSection[0].position.end.offset
 								);
 							} else {
-								return new Notice(
+								new Notice(
 									"Could not find current paragraph"
 								);
 							}
-						} else if (launcher.inputType == "Entire Document") {
+						} else if (inputType == "Entire Document") {
 							text = await this.app.vault.read(
 								this.app.workspace.getActiveFile()
 							);
-						} else if (launcher.inputType == "Link to Document") {
+						} else if (inputType == "Link to Document") {
 							text = `obsidian://open?vault=${encodeURIComponent(
 								this.app.vault.getName()
 							)}&file=${encodeURIComponent(
 								this.app.workspace.getActiveFile().path
 							)}`;
 						} else if (
-							launcher.inputType == "Selected Link/Embed Contents"
+							inputType == "Selected Link/Embed Contents"
 						) {
 							let metadataCache =
 								this.app.metadataCache.getFileCache(
@@ -162,25 +146,27 @@ export default class ShortcutLauncherPlugin extends Plugin {
 									text = arrayBufferToBase64(binary);
 								}
 							} else {
-								return new Notice(
+								new Notice(
 									"Could not find current link or embed"
 								);
 							}
 						}
-						if (Platform.isMobileApp) {
-							window.open(
-								`shortcuts://run-shortcut?name=${encodeURIComponent(
-									launcher.shortcutName
-								)}&input=text&text=${encodeURIComponent(text)}`
-							);
-						} else {
-							require("child_process").exec(
-								`echo "${text}" | shortcuts run "${launcher.shortcutName}"`
-							);
-						}
-					},
-				});
-			}
+						inputs.push(text);
+					}, Promise.resolve())
+
+					if (Platform.isMobileApp) {
+						window.open(
+							`shortcuts://run-shortcut?name=${encodeURIComponent(
+								launcher.shortcutName
+							)}&input=text&text=${encodeURIComponent(inputs.join(launcher.separator))}`
+						);
+					} else {
+						require("child_process").exec(
+							`echo "${inputs.join(launcher.separator)}" | shortcuts run "${launcher.shortcutName}"`
+						);
+					}
+				},
+			});
 		});
 	}
 
