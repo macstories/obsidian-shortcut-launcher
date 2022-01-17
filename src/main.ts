@@ -1,4 +1,10 @@
-import { getLinkpath, Notice, Plugin, ReferenceCache } from "obsidian";
+import {
+	getLinkpath,
+	Notice,
+	Platform,
+	Plugin,
+	ReferenceCache,
+} from "obsidian";
 import { SettingsTab } from "./SettingsTab";
 
 declare module "obsidian" {
@@ -102,34 +108,58 @@ export default class ShortcutLauncherPlugin extends Plugin {
 								this.app.workspace.getActiveFile()
 							);
 						} else if (launcher.inputType == "Link to Document") {
-							text = `obsidian://open?vault=${encodeURIComponent(this.app.vault.getName())}&file=${encodeURIComponent(this.app.workspace.getActiveFile().path)}`
-						} else if (launcher.inputType == "Selected Link/Embed Contents") {
+							text = `obsidian://open?vault=${encodeURIComponent(
+								this.app.vault.getName()
+							)}&file=${encodeURIComponent(
+								this.app.workspace.getActiveFile().path
+							)}`;
+						} else if (
+							launcher.inputType == "Selected Link/Embed Contents"
+						) {
 							let metadataCache =
 								this.app.metadataCache.getFileCache(
 									this.app.workspace.getActiveFile()
 								);
 
-							let linksAndEmbeds = ((metadataCache.links ?? []) as ReferenceCache[]).concat((metadataCache.embeds ?? []) as ReferenceCache[])
+							let linksAndEmbeds = (
+								(metadataCache.links ?? []) as ReferenceCache[]
+							).concat(
+								(metadataCache.embeds ?? []) as ReferenceCache[]
+							);
 							let cursorOffset = editor.posToOffset(
 								editor.getCursor()
 							);
 							let matchingLinkOrEmbed = linksAndEmbeds.filter(
 								(cached) =>
-										cached.position.start.offset <=
+									cached.position.start.offset <=
 										cursorOffset &&
-										cached.position.end.offset >= cursorOffset
+									cached.position.end.offset >= cursorOffset
 							);
 							if (matchingLinkOrEmbed.length > 0) {
-								let linkpath = getLinkpath(matchingLinkOrEmbed[0].link)
-								let linkedFile = this.app.metadataCache.getFirstLinkpathDest(
-									linkpath, 
-									this.app.workspace.getActiveFile().path
-								)
-								if (!matchingLinkOrEmbed[0].link.contains('.') || linkpath.endsWith('.md') || linkpath.endsWith('txt')) {
-									text = await this.app.vault.read(linkedFile)
+								let linkpath = getLinkpath(
+									matchingLinkOrEmbed[0].link
+								);
+								let linkedFile =
+									this.app.metadataCache.getFirstLinkpathDest(
+										linkpath,
+										this.app.workspace.getActiveFile().path
+									);
+								if (
+									!matchingLinkOrEmbed[0].link.contains(
+										"."
+									) ||
+									linkpath.endsWith(".md") ||
+									linkpath.endsWith("txt")
+								) {
+									text = await this.app.vault.read(
+										linkedFile
+									);
 								} else {
-									let binary = await this.app.vault.readBinary(linkedFile)
-									text = arrayBufferToBase64(binary)
+									let binary =
+										await this.app.vault.readBinary(
+											linkedFile
+										);
+									text = arrayBufferToBase64(binary);
 								}
 							} else {
 								return new Notice(
@@ -137,11 +167,17 @@ export default class ShortcutLauncherPlugin extends Plugin {
 								);
 							}
 						}
-						window.open(
-							`shortcuts://run-shortcut?name=${encodeURIComponent(
-								launcher.shortcutName
-							)}&input=text&text=${encodeURIComponent(text)}`
-						);
+						if (Platform.isMobileApp) {
+							window.open(
+								`shortcuts://run-shortcut?name=${encodeURIComponent(
+									launcher.shortcutName
+								)}&input=text&text=${encodeURIComponent(text)}`
+							);
+						} else {
+							require("child_process").exec(
+								`echo "${text}" | shortcuts run "${launcher.shortcutName}"`
+							);
+						}
 					},
 				});
 			}
@@ -173,11 +209,11 @@ export default class ShortcutLauncherPlugin extends Plugin {
 
 // https://stackoverflow.com/a/9458996/4927033
 function arrayBufferToBase64(buffer: ArrayBuffer) {
-    var binary = '';
-    var bytes = new Uint8Array( buffer );
-    var len = bytes.byteLength;
-    for (var i = 0; i < len; i++) {
-        binary += String.fromCharCode( bytes[ i ] );
-    }
-    return window.btoa( binary );
+	var binary = "";
+	var bytes = new Uint8Array(buffer);
+	var len = bytes.byteLength;
+	for (var i = 0; i < len; i++) {
+		binary += String.fromCharCode(bytes[i]);
+	}
+	return window.btoa(binary);
 }
