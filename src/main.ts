@@ -5,6 +5,7 @@ import {
 	Plugin,
 	ReferenceCache,
 } from "obsidian";
+import * as path from "path/posix";
 import { SettingsTab } from "./SettingsTab";
 
 declare module "obsidian" {
@@ -54,49 +55,6 @@ export default class ShortcutLauncherPlugin extends Plugin {
 						var text = "";
 						if (inputType == "Selected Text") {
 							text = editor.getSelection();
-						} else if (inputType == "Current Paragraph") {
-							let metadataCache =
-								this.app.metadataCache.getFileCache(
-									this.app.workspace.getActiveFile()
-								);
-							if (!metadataCache.sections) {
-								new Notice(
-									"Could not find current paragraph"
-								);
-							}
-							let cursorOffset = editor.posToOffset(
-								editor.getCursor()
-							);
-							let matchingSection = metadataCache.sections.filter(
-								(section) =>
-									section.position.start.offset <=
-										cursorOffset &&
-									section.position.end.offset >= cursorOffset
-							);
-							if (matchingSection.length > 0) {
-								let documentContents =
-									await this.app.vault.read(
-										this.app.workspace.getActiveFile()
-									);
-								text = documentContents.substring(
-									matchingSection[0].position.start.offset,
-									matchingSection[0].position.end.offset
-								);
-							} else {
-								new Notice(
-									"Could not find current paragraph"
-								);
-							}
-						} else if (inputType == "Entire Document") {
-							text = await this.app.vault.read(
-								this.app.workspace.getActiveFile()
-							);
-						} else if (inputType == "Link to Document") {
-							text = `obsidian://open?vault=${encodeURIComponent(
-								this.app.vault.getName()
-							)}&file=${encodeURIComponent(
-								this.app.workspace.getActiveFile().path
-							)}`;
 						} else if (
 							inputType == "Selected Link/Embed Contents"
 						) {
@@ -150,6 +108,53 @@ export default class ShortcutLauncherPlugin extends Plugin {
 									"Could not find current link or embed"
 								);
 							}
+						} else if (inputType == "Current Paragraph") {
+							let metadataCache =
+								this.app.metadataCache.getFileCache(
+									this.app.workspace.getActiveFile()
+								);
+							if (!metadataCache.sections) {
+								new Notice(
+									"Could not find current paragraph"
+								);
+							}
+							let cursorOffset = editor.posToOffset(
+								editor.getCursor()
+							);
+							let matchingSection = metadataCache.sections.filter(
+								(section) =>
+									section.position.start.offset <=
+										cursorOffset &&
+									section.position.end.offset >= cursorOffset
+							);
+							if (matchingSection.length > 0) {
+								let documentContents =
+									await this.app.vault.read(
+										this.app.workspace.getActiveFile()
+									);
+								text = documentContents.substring(
+									matchingSection[0].position.start.offset,
+									matchingSection[0].position.end.offset
+								);
+							} else {
+								new Notice(
+									"Could not find current paragraph"
+								);
+							}
+						} else if (inputType == "Entire Document") {
+							text = await this.app.vault.read(
+								this.app.workspace.getActiveFile()
+							);
+						} else if (inputType == "Link to Document") {
+							text = `obsidian://open?vault=${encodeURIComponent(
+								this.app.vault.getName()
+							)}&file=${encodeURIComponent(
+								this.app.workspace.getActiveFile().path
+							)}`;
+						} else if (inputType == "Document Name") {
+							text = this.app.workspace.getActiveFile().basename
+						} else if (inputType == "Document Path") {
+							text = this.app.workspace.getActiveFile().path
 						}
 						inputs.push(text);
 					}, Promise.resolve())
