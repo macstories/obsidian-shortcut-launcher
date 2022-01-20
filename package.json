@@ -1,26 +1,26 @@
 {
-	"name": "obsidian-sample-plugin",
-	"version": "0.12.0",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
-	"main": "main.js",
-	"scripts": {
-		"dev": "node esbuild.config.mjs",
-		"build": "node esbuild.config.mjs production",
-		"copy": "npm run build && cp ./{main.js,versions.json,manifest.json,data.json} ~/Library/Mobile\\ Documents/iCloud~md~obsidian/Documents/Notes/.obsidian/plugins/obsidian-shortcut-launcher-build/",
-		"clear": "rm ~/Library/Mobile\\ Documents/iCloud~md~obsidian/Documents/Notes/.obsidian/plugins/obsidian-shortcut-launcher-build/*",
-		"zip": "npm run build && zip obsidian-shortcut-launcher.zip main.js versions.json manifest.json"
-	},
-	"keywords": [],
-	"author": "",
-	"license": "MIT",
-	"devDependencies": {
-		"@types/node": "^16.11.6",
-		"@typescript-eslint/eslint-plugin": "^5.2.0",
-		"@typescript-eslint/parser": "^5.2.0",
-		"builtin-modules": "^3.2.0",
-		"esbuild": "0.13.12",
-		"obsidian": "^0.12.17",
-		"tslib": "2.3.1",
-		"typescript": "4.4.4"
-	}
+  "name": "obsidian-shortcut-launcher",
+  "version": "1.0.0",
+  "description": "Obsidian Shortcut Launcher",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "node esbuild.config.mjs production",
+    "copy": "npm run build && cp ./{main.js,versions.json,manifest.json,data.json} ~/Library/Mobile\\ Documents/iCloud~md~obsidian/Documents/Notes/.obsidian/plugins/obsidian-shortcut-launcher-build/",
+    "clear": "rm ~/Library/Mobile\\ Documents/iCloud~md~obsidian/Documents/Notes/.obsidian/plugins/obsidian-shortcut-launcher-build/*",
+    "zip": "npm run build && zip obsidian-shortcut-launcher.zip main.js versions.json manifest.json"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^16.11.6",
+    "@typescript-eslint/eslint-plugin": "^5.2.0",
+    "@typescript-eslint/parser": "^5.2.0",
+    "builtin-modules": "^3.2.0",
+    "esbuild": "0.13.12",
+    "obsidian": "^0.12.17",
+    "tslib": "2.3.1",
+    "typescript": "4.4.4"
+  }
 }

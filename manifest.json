@@ -1,10 +1,10 @@
 {
-	"id": "obsidian-shortcut-launcher",
-	"name": "Shortcut Launcher",
-	"version": "1.0.0",
-	"minAppVersion": "0.12.0",
-	"description": "Create shortcut launchers in Obsidian.",
-	"author": "Finn Voorhees",
-	"authorUrl": "https://twitter.com/finnvoorhees",
-	"isDesktopOnly": false
+  "id": "obsidian-shortcut-launcher",
+  "name": "Obsidian Shortcut Launcher",
+  "version": "1.0.0",
+  "minAppVersion": "0.13.0",
+  "description": "Trigger shortcuts in Apple's Shortcuts app from Obsidian with custom commands.",
+  "author": "Finn Voorhees",
+  "authorUrl": "https://twitter.com/finnvoorhees",
+  "isDesktopOnly": false
 }
