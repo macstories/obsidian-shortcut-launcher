@@ -18,14 +18,22 @@ You can create a new launcher for Shortcuts in Shortcut Launcher's settings by t
 
 There are seven different input types you can pass from Obsidian to Shortcuts:
 
-* **Selected Text**:
-* **Selected Link/Embed Contents**:
-* **Current Paragraph**:
-* **Entire Document**:
-* **Link to Document**:
-* **Document Name**:
-* **Document Path**:
+* **Selected Text**: The current text selection from the editor.
+* **Selected Link/Embed Contents**: The contents of the file referenced in an [[internal link]] under the cursor. If the internal link points to a note, the full text of the note will be passed to Shortcuts as input; if the internal link points to an attachment (e.g. an image), the file will be encoded with base64 first and passed to Shortcuts as base64-encoded text.
+* **Current Paragraph**: The text of the paragraph the cursor is currently in.
+* **Entire Document**: The entire text of the current document.
+* **Link to Document**: The Obsidian URL to the current document.
+* **Document Name**: The name of the current document, without file extension.
+* **Document Path**: The relative path to the current document in your Obsidian vault.
 
 ## Passing Multiple Values with Custom Separators
 
-## OSL Commands in Obsidian
+OSL also features a 'Multiple' option that lets you pass multiple values at once to a shortcut. When you select this option, you can choose multiple input types, which will be passed to Shortcuts with a separator. By default, the separator character is `,` (a comma), but you can change the separator to be whatever you want. To access multiple input values in Shortcuts, use the 'Split Text' action and enter a value for the Custom Separator.
+
+## Running Shortcuts with Input
+
+Text passed by OSL to a shortcut is available in the default 'Shortcut Input' variable of the Shortcuts app. In the case of files passed as base64-encoded text, you will have to decode the input first using the dedicated Decode Base64 action.
+
+On macOS Monterey, OSL can trigger shortcuts in the background thanks to a shell script, meaning that the Shortcuts app will not be launched in the foreground.
+
+On iOS and iPadOS 15, Obsidian will need to launch the Shortcuts app via URL scheme.
