@@ -18,6 +18,8 @@ You can create a new launcher for Shortcuts in Shortcut Launcher's settings by t
 
 ## Passing Values from Obsidian
 
+![](https://cdn.macstories.net/cleanshot-2022-01-21-at-5-47-57-2x-1642783800591.png)
+
 There are seven different input types you can pass from Obsidian to Shortcuts:
 
 * **Selected Text**: The current text selection from the editor.
@@ -33,6 +35,8 @@ There are seven different input types you can pass from Obsidian to Shortcuts:
 OSL also features a 'Multiple' option that lets you pass multiple values at once to a shortcut. When you select this option, you can choose multiple input types, which will be passed to Shortcuts with a separator. By default, the separator character is `,` (a comma), but you can change the separator to be whatever you want. To access multiple input values in Shortcuts, use the 'Split Text' action and enter a value for the Custom Separator.
 
 ## Running Shortcuts with Input
+
+![](https://cdn.macstories.net/cleanshot-2022-01-21-at-5-48-32-2x-1642783800940.png)
 
 Text passed by OSL to a shortcut is available in the default 'Shortcut Input' variable of the Shortcuts app. In the case of files passed as base64-encoded text, you will have to decode the input first using the dedicated Decode Base64 action.
 
