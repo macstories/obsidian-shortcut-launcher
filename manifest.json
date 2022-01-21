@@ -1,6 +1,6 @@
 {
   "id": "obsidian-shortcut-launcher",
-  "name": "Obsidian Shortcut Launcher",
+  "name": "Shortcut Launcher",
   "version": "1.0.0",
   "minAppVersion": "0.13.0",
   "description": "Trigger shortcuts in Apple's Shortcuts app from Obsidian with custom commands.",
