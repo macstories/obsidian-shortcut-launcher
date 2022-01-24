@@ -1,4 +1,5 @@
 import {
+	Command,
 	getLinkpath,
 	Notice,
 	Platform,
@@ -10,13 +11,9 @@ import { SettingsTab } from "./SettingsTab";
 declare module "obsidian" {
 	interface Commands {
 		removeCommand(arg0: string): void;
-		listCommands(): Command[];
 	}
 	interface App {
 		commands: Commands;
-	}
-	interface DataAdapter {
-		basePath: string;
 	}
 }
 
@@ -37,6 +34,7 @@ const DEFAULT_SETTINGS: ShortcutLauncherPluginSettings = {
 
 export default class ShortcutLauncherPlugin extends Plugin {
 	settings: ShortcutLauncherPluginSettings;
+	registeredCommands: Command[] = [];
 
 	async onload() {
 		await this.loadSettings();
@@ -45,169 +43,170 @@ export default class ShortcutLauncherPlugin extends Plugin {
 	}
 
 	async createCommands() {
+		this.registeredCommands = [];
 		this.settings.launchers.forEach((launcher) => {
-			this.addCommand({
-				id: launcher.commandName,
-				name: launcher.commandName,
-				editorCallback: async (editor) => {
-					var inputs: string[] = [];
+			this.registeredCommands.push(
+				this.addCommand({
+					id: launcher.commandName,
+					name: launcher.commandName,
+					editorCallback: async (editor) => {
+						var inputs: string[] = [];
 
-					await launcher.inputTypes
-						.filter((inputType) => inputType != "Multiple")
-						.reduce(async (promise, inputType) => {
-							await promise;
-							var text = "";
-							if (inputType == "Selected Text") {
-								text = editor.getSelection();
-							} else if (
-								inputType == "Selected Link/Embed Contents"
-							) {
-								let metadataCache =
-									this.app.metadataCache.getFileCache(
-										this.app.workspace.getActiveFile()
-									);
-
-								let linksAndEmbeds = (
-									(metadataCache.links ??
-										[]) as ReferenceCache[]
-								).concat(
-									(metadataCache.embeds ??
-										[]) as ReferenceCache[]
-								);
-								let cursorOffset = editor.posToOffset(
-									editor.getCursor()
-								);
-								let matchingLinkOrEmbed = linksAndEmbeds.filter(
-									(cached) =>
-										cached.position.start.offset <=
-											cursorOffset &&
-										cached.position.end.offset >=
-											cursorOffset
-								);
-								if (matchingLinkOrEmbed.length > 0) {
-									let linkpath = getLinkpath(
-										matchingLinkOrEmbed[0].link
-									);
-									let linkedFile =
-										this.app.metadataCache.getFirstLinkpathDest(
-											linkpath,
+						await launcher.inputTypes
+							.filter((inputType) => inputType != "Multiple")
+							.reduce(async (promise, inputType) => {
+								await promise;
+								var text = "";
+								if (inputType == "Selected Text") {
+									text = editor.getSelection();
+								} else if (
+									inputType == "Selected Link/Embed Contents"
+								) {
+									let metadataCache =
+										this.app.metadataCache.getFileCache(
 											this.app.workspace.getActiveFile()
-												.path
 										);
-									if (
-										!matchingLinkOrEmbed[0].link.contains(
-											"."
-										) ||
-										linkpath.endsWith(".md") ||
-										linkpath.endsWith("txt")
-									) {
-										text = await this.app.vault.read(
-											linkedFile
+
+									let linksAndEmbeds = (
+										(metadataCache.links ??
+											[]) as ReferenceCache[]
+									).concat(
+										(metadataCache.embeds ??
+											[]) as ReferenceCache[]
+									);
+									let cursorOffset = editor.posToOffset(
+										editor.getCursor()
+									);
+									let matchingLinkOrEmbed =
+										linksAndEmbeds.filter(
+											(cached) =>
+												cached.position.start.offset <=
+													cursorOffset &&
+												cached.position.end.offset >=
+													cursorOffset
 										);
-									} else {
-										let binary =
-											await this.app.vault.readBinary(
+									if (matchingLinkOrEmbed.length > 0) {
+										let linkpath = getLinkpath(
+											matchingLinkOrEmbed[0].link
+										);
+										let linkedFile =
+											this.app.metadataCache.getFirstLinkpathDest(
+												linkpath,
+												this.app.workspace.getActiveFile()
+													.path
+											);
+										if (
+											!matchingLinkOrEmbed[0].link.contains(
+												"."
+											) ||
+											linkpath.endsWith(".md") ||
+											linkpath.endsWith("txt")
+										) {
+											text = await this.app.vault.read(
 												linkedFile
 											);
-										text = arrayBufferToBase64(binary);
+										} else {
+											let binary =
+												await this.app.vault.readBinary(
+													linkedFile
+												);
+											text = arrayBufferToBase64(binary);
+										}
+									} else {
+										new Notice(
+											"Could not find current link or embed"
+										);
 									}
-								} else {
-									new Notice(
-										"Could not find current link or embed"
-									);
-								}
-							} else if (inputType == "Current Paragraph") {
-								let metadataCache =
-									this.app.metadataCache.getFileCache(
-										this.app.workspace.getActiveFile()
-									);
-								if (!metadataCache.sections) {
-									new Notice(
-										"Could not find current paragraph"
-									);
-								}
-								let cursorOffset = editor.posToOffset(
-									editor.getCursor()
-								);
-								let matchingSection =
-									metadataCache.sections.filter(
-										(section) =>
-											section.position.start.offset <=
-												cursorOffset &&
-											section.position.end.offset >=
-												cursorOffset
-									);
-								if (matchingSection.length > 0) {
-									let documentContents =
-										await this.app.vault.read(
+								} else if (inputType == "Current Paragraph") {
+									let metadataCache =
+										this.app.metadataCache.getFileCache(
 											this.app.workspace.getActiveFile()
 										);
-									text = documentContents.substring(
-										matchingSection[0].position.start
-											.offset,
-										matchingSection[0].position.end.offset
+									if (!metadataCache.sections) {
+										new Notice(
+											"Could not find current paragraph"
+										);
+									}
+									let cursorOffset = editor.posToOffset(
+										editor.getCursor()
 									);
-								} else {
-									new Notice(
-										"Could not find current paragraph"
+									let matchingSection =
+										metadataCache.sections.filter(
+											(section) =>
+												section.position.start.offset <=
+													cursorOffset &&
+												section.position.end.offset >=
+													cursorOffset
+										);
+									if (matchingSection.length > 0) {
+										let documentContents =
+											await this.app.vault.read(
+												this.app.workspace.getActiveFile()
+											);
+										text = documentContents.substring(
+											matchingSection[0].position.start
+												.offset,
+											matchingSection[0].position.end
+												.offset
+										);
+									} else {
+										new Notice(
+											"Could not find current paragraph"
+										);
+									}
+								} else if (inputType == "Entire Document") {
+									text = await this.app.vault.read(
+										this.app.workspace.getActiveFile()
+									);
+								} else if (inputType == "Link to Document") {
+									text = `obsidian://open?vault=${encodeURIComponent(
+										this.app.vault.getName()
+									)}&file=${encodeURIComponent(
+										this.app.workspace.getActiveFile().path
+									)}`;
+								} else if (inputType == "Document Name") {
+									text =
+										this.app.workspace.getActiveFile()
+											.basename;
+								} else if (inputType == "Document Path") {
+									text =
+										this.app.workspace.getActiveFile().path;
+								}
+								inputs.push(text);
+							}, Promise.resolve());
+
+						if (Platform.isMobileApp) {
+							window.open(
+								`shortcuts://run-shortcut?name=${encodeURIComponent(
+									launcher.shortcutName
+								)}&input=text&text=${encodeURIComponent(
+									inputs.join(launcher.separator)
+								)}`
+							);
+						} else {
+							let tempFilePath = require("path").join(
+								require("os").tmpdir(),
+								"obsidian-shortcut-launcher-temp-input"
+							);
+							let escapedShortcutName =
+								launcher.shortcutName.replace(/["\\]/g, "\\$&");
+							let fs = require("fs");
+							fs.writeFile(
+								tempFilePath,
+								inputs.join(launcher.separator),
+								() => {
+									require("child_process").exec(
+										`shortcuts run "${escapedShortcutName}" -i ${tempFilePath}`,
+										async () => {
+											fs.unlink(tempFilePath, () => {});
+										}
 									);
 								}
-							} else if (inputType == "Entire Document") {
-								text = await this.app.vault.read(
-									this.app.workspace.getActiveFile()
-								);
-							} else if (inputType == "Link to Document") {
-								text = `obsidian://open?vault=${encodeURIComponent(
-									this.app.vault.getName()
-								)}&file=${encodeURIComponent(
-									this.app.workspace.getActiveFile().path
-								)}`;
-							} else if (inputType == "Document Name") {
-								text =
-									this.app.workspace.getActiveFile().basename;
-							} else if (inputType == "Document Path") {
-								text = this.app.workspace.getActiveFile().path;
-							}
-							inputs.push(text);
-						}, Promise.resolve());
-
-					if (Platform.isMobileApp) {
-						window.open(
-							`shortcuts://run-shortcut?name=${encodeURIComponent(
-								launcher.shortcutName
-							)}&input=text&text=${encodeURIComponent(
-								inputs.join(launcher.separator)
-							)}`
-						);
-					} else {
-						let tempName = "obsidian-shortcut-launcher-temp-input";
-						let oldTempInput =
-							await this.app.vault.getAbstractFileByPath(
-								tempName
 							);
-						if (oldTempInput) {
-							await this.app.vault.delete(oldTempInput);
 						}
-						let tempInput = await this.app.vault.create(
-							tempName,
-							inputs.join(launcher.separator)
-						);
-						let escapedShortcutName = launcher.shortcutName.replace(
-							/["\\]/g,
-							"\\$&"
-						);
-						require("child_process").exec(
-							`shortcuts run "${escapedShortcutName}" -i ${this.app.vault.adapter.basePath.replace(
-								/(\s+)/g,
-								"\\$1"
-							)}/${tempName}`,
-							async () => {
-								await this.app.vault.delete(tempInput);
-							}
-						);
-					}
-				},
-			});
+					},
+				})
+			);
 		});
 	}
 
@@ -222,14 +221,10 @@ export default class ShortcutLauncherPlugin extends Plugin {
 	async saveSettings() {
 		await this.saveData(this.settings);
 
-		this.app.commands
-			.listCommands()
-			.filter((command) =>
-				command.id.startsWith("obsidian-shortcut-launcher:")
-			)
-			.forEach((command) => {
-				this.app.commands.removeCommand(command.id);
-			});
+		this.registeredCommands.forEach((command) => {
+			this.app.commands.removeCommand(command.id);
+		});
+		this.registeredCommands = [];
 
 		await this.createCommands();
 	}
