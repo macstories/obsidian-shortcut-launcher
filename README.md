@@ -10,6 +10,8 @@ The plugin requires iOS 15, iPadOS 15, or macOS Monterey.
 
 ## Creating Launchers for Shortcuts
 
+![Creating launchers for Shortcuts in Obsidian.](https://cdn.macstories.net/monday-24-jan-2022-18-21-39-1643044904822.png)
+
 You can create a new launcher for Shortcuts in Shortcut Launcher's settings by tapping the 'New' button. When creating a new launcher, there are three main fields you have to configure:
 
 * **Command Name**: The name of the launcher. This will appear as a command in Obsidian. This name can be anything you want and does not need to match the name of the shortcut.
