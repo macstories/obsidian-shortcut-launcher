@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node esbuild.config.mjs",
     "build": "node esbuild.config.mjs production",
-    "copy": "npm run build && cp ./{main.js,versions.json,manifest.json,data.json} ~/Library/Mobile\\ Documents/iCloud~md~obsidian/Documents/Notes/.obsidian/plugins/obsidian-shortcut-launcher-build/",
+    "copy": "npm run build && cp ./{main.js,versions.json,manifest.json} ~/Library/Mobile\\ Documents/iCloud~md~obsidian/Documents/Notes/.obsidian/plugins/obsidian-shortcut-launcher-build/",
     "clear": "rm ~/Library/Mobile\\ Documents/iCloud~md~obsidian/Documents/Notes/.obsidian/plugins/obsidian-shortcut-launcher-build/*",
     "zip": "npm run build && zip obsidian-shortcut-launcher.zip main.js versions.json manifest.json"
   },
