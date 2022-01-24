@@ -4,7 +4,7 @@
 
 Trigger shortcuts in Apple's Shortcuts app as custom commands from Obsidian. 
 
-Obsidian Shortcut Launcher (abbreviated as 'OSL') lets you trigger shortcuts and pass along values from Obsidian as input. On macOS Monterey, shortcuts are triggered by Obsidian in the background, without launching the Shortcuts app; on iOS and iPadOS 15, OSL launches shortcuts via URL scheme.
+Obsidian Shortcut Launcher (abbreviated as 'OSL') lets you trigger shortcuts and pass along values from Obsidian as input. On iOS, iPadOS, and macOS, shortcuts are triggered from Obsidian using Apple's official URL scheme for Shortcuts.
 
 The plugin requires iOS 15, iPadOS 15, or macOS Monterey.
 
@@ -46,6 +46,4 @@ OSL also features a 'Multiple' option that lets you pass multiple values at once
 
 Text passed by OSL to a shortcut is available in the default 'Shortcut Input' variable of the Shortcuts app. In the case of files passed as base64-encoded text, you will have to decode the input first using the dedicated Decode Base64 action.
 
-On macOS Monterey, OSL can trigger shortcuts in the background thanks to a shell script, meaning that the Shortcuts app will not be launched in the foreground.
-
-On iOS and iPadOS 15, Obsidian will need to launch the Shortcuts app via URL scheme.
+Regardless of the kind of data you pass from Obsidian to Shortcuts, Obsidian will always need to launch the Shortcuts app via URL scheme to send data to it.
