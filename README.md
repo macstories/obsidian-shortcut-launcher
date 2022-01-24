@@ -42,9 +42,17 @@ Here is an example of an Obsidian command that has passed the name of the curren
 
 ![](https://cdn.macstories.net/monday-24-jan-2022-18-23-05-1643044990698.png)
 
+And here is how you can receive attachments from Obsidian and decode them using base64 in Shortcuts:
+
+---SEND ATTACHMENT HERE
+
 ## Passing Multiple Values with Custom Separators
 
-OSL also features a 'Multiple' option that lets you pass multiple values at once to a shortcut. When you select this option, you can choose multiple input types, which will be passed to Shortcuts with a separator. By default, the separator character is `,` (a comma), but you can change the separator to be whatever you want. To access multiple input values in Shortcuts, use the 'Split Text' action and enter a value for the Custom Separator.
+OSL also features a 'Multiple' option that lets you pass *multiple* values at once to a shortcut. When you select this option, you can choose multiple input types, which will be passed to Shortcuts with a separator. 
+
+By default, the separator character is `,` (a comma), but you can change the separator to be whatever you want. To access multiple input values in Shortcuts, use the 'Split Text' action and enter a value for the Custom Separator.
+
+---PASS MULTIPLE OPTIONS
 
 ## Running Shortcuts with Input
 
