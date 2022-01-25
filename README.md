@@ -1,16 +1,18 @@
 # Obsidian Shortcut Launcher
 
-![](https://cdn.macstories.net/cleanshot-2022-01-21-at-5-39-50-2x-1642783463880.png)
+![](https://cdn.macstories.net/cleanshot-2022-01-25-at-10-04-02-2x-1643144791920.png)
 
 Trigger shortcuts in Apple's Shortcuts app as custom commands from Obsidian. 
 
 Obsidian Shortcut Launcher (abbreviated as 'OSL') lets you trigger shortcuts and pass along values from Obsidian as input. On iOS and iPadOS, shortcuts are triggered from Obsidian using Apple's official URL scheme for Shortcuts; on macOS, OSL can run shortcuts in the background – without opening the Shortcuts app.
 
-The plugin requires iOS 15, iPadOS 15, or macOS Monterey.
+![](https://cdn.macstories.net/cleanshot-2022-01-21-at-5-39-50-2x-1642783463880.png)
+
+The plugin **requires iOS 15, iPadOS 15, or macOS Monterey**.
 
 ## Installing Obsidian Shortcut Launcher 
 
-You can find the plugin in Obsidian's Community Plugins section. Just search for 'Obsidian Shortcut Launcher', install it, then enable the plugin to start using it in Obsidian.
+You can find the plugin in **Obsidian's Community Plugins** section. Just search for 'Obsidian Shortcut Launcher', install it, then enable the plugin to start using it in Obsidian.
 
 ## Creating Launchers for Shortcuts
 
