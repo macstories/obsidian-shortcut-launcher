@@ -65,12 +65,10 @@ export default class ShortcutLauncherPlugin extends Plugin {
 								await promise;
 								var text = "";
 								if (inputType == "Selected Text") {
-									if (
-										typeof this.app.workspace.activeLeaf
-											.view.getSelection == "function"
-									) {
-										text =
-											this.app.workspace.activeLeaf.view.getSelection();
+									let view =
+										this.app.workspace.activeLeaf.view;
+									if (view.getSelection) {
+										text = view.getSelection();
 									}
 								} else if (
 									inputType == "Selected Link/Embed Contents"
@@ -87,15 +85,14 @@ export default class ShortcutLauncherPlugin extends Plugin {
 										(metadataCache.embeds ??
 											[]) as ReferenceCache[]
 									);
-									let cursorOffset = (
-										this.app.workspace.activeLeaf
-											.view as MarkdownView
-									).editor.posToOffset(
-										(
-											this.app.workspace.activeLeaf
-												.view as MarkdownView
-										).editor.getCursor()
-									);
+									let mdView =
+										this.app.workspace.getActiveViewOfType(
+											MarkdownView
+										);
+									let cursorOffset =
+										mdView.editor.posToOffset(
+											mdView.editor.getCursor()
+										);
 									let matchingLinkOrEmbed =
 										linksAndEmbeds.filter(
 											(cached) =>
@@ -114,7 +111,6 @@ export default class ShortcutLauncherPlugin extends Plugin {
 												this.app.workspace.getActiveFile()
 													.path
 											);
-										this.app.workspace.activeLeaf.view;
 										if (
 											!matchingLinkOrEmbed[0].link.contains(
 												"."
@@ -147,15 +143,14 @@ export default class ShortcutLauncherPlugin extends Plugin {
 											"Could not find current paragraph"
 										);
 									}
-									let cursorOffset = (
-										this.app.workspace.activeLeaf
-											.view as MarkdownView
-									).editor.posToOffset(
-										(
-											this.app.workspace.activeLeaf
-												.view as MarkdownView
-										).editor.getCursor()
-									);
+									let mdView =
+										this.app.workspace.getActiveViewOfType(
+											MarkdownView
+										);
+									let cursorOffset =
+										mdView.editor.posToOffset(
+											mdView.editor.getCursor()
+										);
 									let matchingSection =
 										metadataCache.sections.filter(
 											(section) =>
@@ -246,27 +241,14 @@ export default class ShortcutLauncherPlugin extends Plugin {
 
 	check(launcher: Launcher): boolean {
 		if (launcher.inputTypes.contains("Selected Text")) {
-			if (
-				typeof this.app.workspace.activeLeaf.view.getSelection ==
-				"function"
-			) {
-				if (
-					this.app.workspace.activeLeaf.view.getSelection().length ==
-					0
-				) {
-					return false;
-				}
-			} else {
+			let view = this.app.workspace.activeLeaf.view;
+			if (!view.getSelection) {
 				return false;
 			}
 		}
 		if (launcher.inputTypes.contains("Selected Link/Embed Contents")) {
-			let mdView = this.app.workspace.activeLeaf.view as MarkdownView;
-			if (
-				!mdView ||
-				typeof mdView.getMode == "undefined" ||
-				mdView.getMode() !== "source"
-			) {
+			let mdView = this.app.workspace.getActiveViewOfType(MarkdownView);
+			if (!mdView || mdView.getMode() !== "source") {
 				return false;
 			}
 			let metadataCache = this.app.metadataCache.getFileCache(
@@ -276,18 +258,11 @@ export default class ShortcutLauncherPlugin extends Plugin {
 			let linksAndEmbeds = (
 				(metadataCache.links ?? []) as ReferenceCache[]
 			).concat((metadataCache.embeds ?? []) as ReferenceCache[]);
-			if (
-				typeof (this.app.workspace.activeLeaf.view as MarkdownView)
-					.editor == "undefined"
-			) {
+			if (typeof mdView.editor == "undefined") {
 				return false;
 			}
-			let cursorOffset = (
-				this.app.workspace.activeLeaf.view as MarkdownView
-			).editor.posToOffset(
-				(
-					this.app.workspace.activeLeaf.view as MarkdownView
-				).editor.getCursor()
+			let cursorOffset = mdView.editor.posToOffset(
+				mdView.editor.getCursor()
 			);
 			let matchingLinkOrEmbed = linksAndEmbeds.filter(
 				(cached) =>
@@ -299,12 +274,8 @@ export default class ShortcutLauncherPlugin extends Plugin {
 			}
 		}
 		if (launcher.inputTypes.contains("Current Paragraph")) {
-			let mdView = this.app.workspace.activeLeaf.view as MarkdownView;
-			if (
-				!mdView ||
-				typeof mdView.getMode == "undefined" ||
-				mdView.getMode() !== "source"
-			) {
+			let mdView = this.app.workspace.getActiveViewOfType(MarkdownView);
+			if (!mdView || mdView.getMode() !== "source") {
 				return false;
 			}
 		}
