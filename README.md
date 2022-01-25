@@ -31,12 +31,14 @@ You can create a new launcher for Shortcuts in OSL's settings by tapping the 'Ne
 Obsidian Shortcut Launcher lets you run shortcuts with input text passed by Obsidian. There are seven different input types you can pass from Obsidian to Shortcuts:
 
 * **Selected Text**: The current text selection from Obsidian.
-* **Selected Link/Embed Contents**: The contents of the file referenced in an [[internal link]] under the cursor. If the internal link points to a note, the full text of the note will be passed to Shortcuts as input; if the internal link points to an attachment (e.g. an image), the file will be encoded with base64 first and passed to Shortcuts as base64-encoded text.
-* **Current Paragraph**: The text of the paragraph the cursor is currently in.
+* **Selected Link/Embed Contents**: The contents of the file referenced in an [[internal link]] under the cursor. If the internal link points to a note, the full text of the note will be passed to Shortcuts as input; if the internal link points to an attachment (e.g. an image), the file will be encoded with base64 first and passed to Shortcuts as base64-encoded text. (Not available in Reading mode.)
+* **Current Paragraph**: The text of the paragraph the cursor is currently in. (Not available in Reading mode.)
 * **Entire Document**: The entire text of the current document.
 * **Link to Document**: The Obsidian URL to the current document.
 * **Document Name**: The name of the current document, without file extension.
 * **Document Path**: The relative path to the current document in your Obsidian vault.
+
+(Please note: the Current Paragraph and Embed Contents values are only supported when Obsidian is in Editing/Live Preview mode.)
 
 Here is an example of an Obsidian command that has passed the name of the current document to a shortcut in the Shortcuts app:
 
