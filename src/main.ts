@@ -1,6 +1,7 @@
 import {
 	Command,
 	getLinkpath,
+	MarkdownView,
 	Notice,
 	Platform,
 	Plugin,
@@ -14,6 +15,9 @@ declare module "obsidian" {
 	}
 	interface App {
 		commands: Commands;
+	}
+	interface View {
+		getSelection(): string;
 	}
 }
 
@@ -47,18 +51,27 @@ export default class ShortcutLauncherPlugin extends Plugin {
 		this.settings.launchers.forEach((launcher) => {
 			this.registeredCommands.push(
 				this.addCommand({
-					id: launcher.commandName,
+					id: launcher.commandName.replace(/\s+/g, "-").toLowerCase(),
 					name: launcher.commandName,
-					editorCallback: async (editor) => {
+					checkCallback: (checking) => {
+						if (checking) {
+							return this.check(launcher);
+						}
 						var inputs: string[] = [];
 
-						await launcher.inputTypes
+						launcher.inputTypes
 							.filter((inputType) => inputType != "Multiple")
 							.reduce(async (promise, inputType) => {
 								await promise;
 								var text = "";
 								if (inputType == "Selected Text") {
-									text = editor.getSelection();
+									if (
+										typeof this.app.workspace.activeLeaf
+											.view.getSelection == "function"
+									) {
+										text =
+											this.app.workspace.activeLeaf.view.getSelection();
+									}
 								} else if (
 									inputType == "Selected Link/Embed Contents"
 								) {
@@ -74,8 +87,14 @@ export default class ShortcutLauncherPlugin extends Plugin {
 										(metadataCache.embeds ??
 											[]) as ReferenceCache[]
 									);
-									let cursorOffset = editor.posToOffset(
-										editor.getCursor()
+									let cursorOffset = (
+										this.app.workspace.activeLeaf
+											.view as MarkdownView
+									).editor.posToOffset(
+										(
+											this.app.workspace.activeLeaf
+												.view as MarkdownView
+										).editor.getCursor()
 									);
 									let matchingLinkOrEmbed =
 										linksAndEmbeds.filter(
@@ -95,6 +114,7 @@ export default class ShortcutLauncherPlugin extends Plugin {
 												this.app.workspace.getActiveFile()
 													.path
 											);
+										this.app.workspace.activeLeaf.view;
 										if (
 											!matchingLinkOrEmbed[0].link.contains(
 												"."
@@ -127,8 +147,14 @@ export default class ShortcutLauncherPlugin extends Plugin {
 											"Could not find current paragraph"
 										);
 									}
-									let cursorOffset = editor.posToOffset(
-										editor.getCursor()
+									let cursorOffset = (
+										this.app.workspace.activeLeaf
+											.view as MarkdownView
+									).editor.posToOffset(
+										(
+											this.app.workspace.activeLeaf
+												.view as MarkdownView
+										).editor.getCursor()
 									);
 									let matchingSection =
 										metadataCache.sections.filter(
@@ -173,41 +199,126 @@ export default class ShortcutLauncherPlugin extends Plugin {
 										this.app.workspace.getActiveFile().path;
 								}
 								inputs.push(text);
-							}, Promise.resolve());
-
-						if (Platform.isMobileApp) {
-							window.open(
-								`shortcuts://run-shortcut?name=${encodeURIComponent(
-									launcher.shortcutName
-								)}&input=text&text=${encodeURIComponent(
-									inputs.join(launcher.separator)
-								)}`
-							);
-						} else {
-							let tempFilePath = require("path").join(
-								require("os").tmpdir(),
-								"obsidian-shortcut-launcher-temp-input"
-							);
-							let escapedShortcutName =
-								launcher.shortcutName.replace(/["\\]/g, "\\$&");
-							let fs = require("fs");
-							fs.writeFile(
-								tempFilePath,
-								inputs.join(launcher.separator),
-								() => {
-									require("child_process").exec(
-										`shortcuts run "${escapedShortcutName}" -i ${tempFilePath}`,
-										async () => {
-											fs.unlink(tempFilePath, () => {});
+							}, Promise.resolve())
+							.then(() => {
+								if (Platform.isMobileApp) {
+									window.open(
+										`shortcuts://run-shortcut?name=${encodeURIComponent(
+											launcher.shortcutName
+										)}&input=text&text=${encodeURIComponent(
+											inputs.join(launcher.separator)
+										)}`
+									);
+								} else {
+									let tempFilePath = require("path").join(
+										require("os").tmpdir(),
+										"obsidian-shortcut-launcher-temp-input"
+									);
+									let escapedShortcutName =
+										launcher.shortcutName.replace(
+											/["\\]/g,
+											"\\$&"
+										);
+									let fs = require("fs");
+									fs.writeFile(
+										tempFilePath,
+										inputs.join(launcher.separator),
+										() => {
+											require("child_process").exec(
+												`shortcuts run "${escapedShortcutName}" -i ${tempFilePath}`,
+												async () => {
+													fs.unlink(
+														tempFilePath,
+														() => {}
+													);
+												}
+											);
 										}
 									);
 								}
-							);
-						}
+							});
+						return true;
 					},
 				})
 			);
 		});
+	}
+
+	check(launcher: Launcher): boolean {
+		if (launcher.inputTypes.contains("Selected Text")) {
+			if (
+				typeof this.app.workspace.activeLeaf.view.getSelection ==
+				"function"
+			) {
+				if (
+					this.app.workspace.activeLeaf.view.getSelection().length ==
+					0
+				) {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		}
+		if (launcher.inputTypes.contains("Selected Link/Embed Contents")) {
+			let mdView = this.app.workspace.activeLeaf.view as MarkdownView;
+			if (
+				!mdView ||
+				typeof mdView.getMode == "undefined" ||
+				mdView.getMode() !== "source"
+			) {
+				return false;
+			}
+			let metadataCache = this.app.metadataCache.getFileCache(
+				this.app.workspace.getActiveFile()
+			);
+
+			let linksAndEmbeds = (
+				(metadataCache.links ?? []) as ReferenceCache[]
+			).concat((metadataCache.embeds ?? []) as ReferenceCache[]);
+			if (
+				typeof (this.app.workspace.activeLeaf.view as MarkdownView)
+					.editor == "undefined"
+			) {
+				return false;
+			}
+			let cursorOffset = (
+				this.app.workspace.activeLeaf.view as MarkdownView
+			).editor.posToOffset(
+				(
+					this.app.workspace.activeLeaf.view as MarkdownView
+				).editor.getCursor()
+			);
+			let matchingLinkOrEmbed = linksAndEmbeds.filter(
+				(cached) =>
+					cached.position.start.offset <= cursorOffset &&
+					cached.position.end.offset >= cursorOffset
+			);
+			if (matchingLinkOrEmbed.length == 0) {
+				return false;
+			}
+		}
+		if (launcher.inputTypes.contains("Current Paragraph")) {
+			let mdView = this.app.workspace.activeLeaf.view as MarkdownView;
+			if (
+				!mdView ||
+				typeof mdView.getMode == "undefined" ||
+				mdView.getMode() !== "source"
+			) {
+				return false;
+			}
+		}
+		if (
+			launcher.inputTypes.contains("Entire Document") ||
+			launcher.inputTypes.contains("Link to Document") ||
+			launcher.inputTypes.contains("Document Name") ||
+			launcher.inputTypes.contains("Document Path")
+		) {
+			if (!this.app.workspace.getActiveFile()) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	async loadSettings() {

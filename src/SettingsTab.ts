@@ -34,7 +34,7 @@ export class SettingsTab extends PluginSettingTab {
 								commandName: commandName,
 								shortcutName: shortcutName,
 								inputTypes: inputTypes,
-								separator: separator
+								separator: separator,
 							});
 							this.plugin.saveSettings();
 							this.display();
@@ -46,9 +46,7 @@ export class SettingsTab extends PluginSettingTab {
 		this.plugin.settings.launchers.forEach((launcher, index) => {
 			new Setting(containerEl)
 				.setName(launcher.commandName)
-				.setDesc(
-					`${launcher.shortcutName} < ${launcher.inputTypes[0]}`
-				)
+				.setDesc(`${launcher.shortcutName} < ${launcher.inputTypes[0]}`)
 				.addButton((button) =>
 					button.setIcon("pencil").onClick((event) => {
 						new LauncherModal(
@@ -58,7 +56,12 @@ export class SettingsTab extends PluginSettingTab {
 							launcher.shortcutName,
 							launcher.inputTypes,
 							launcher.separator,
-							(commandName, shortcutName, inputTypes, separator) => {
+							(
+								commandName,
+								shortcutName,
+								inputTypes,
+								separator
+							) => {
 								this.plugin.settings.launchers[
 									index
 								].commandName = commandName;
