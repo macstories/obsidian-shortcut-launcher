@@ -1,6 +1,6 @@
 # Obsidian Shortcut Launcher
 
-![](https://cdn.macstories.net/cleanshot-2022-01-25-at-10-04-02-2x-1643144791920.png)
+![](https://cdn.macstories.net/osl-1643193603979.png)
 
 Trigger shortcuts in Apple's Shortcuts app as custom commands from Obsidian. 
 
