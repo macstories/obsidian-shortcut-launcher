@@ -1,16 +1,18 @@
 # Obsidian Shortcut Launcher
 
-![](https://cdn.macstories.net/cleanshot-2022-01-21-at-5-39-50-2x-1642783463880.png)
+![](https://cdn.macstories.net/osl-1643193603979.png)
 
 Trigger shortcuts in Apple's Shortcuts app as custom commands from Obsidian. 
 
 Obsidian Shortcut Launcher (abbreviated as 'OSL') lets you trigger shortcuts and pass along values from Obsidian as input. On iOS and iPadOS, shortcuts are triggered from Obsidian using Apple's official URL scheme for Shortcuts; on macOS, OSL can run shortcuts in the background – without opening the Shortcuts app.
 
-The plugin requires iOS 15, iPadOS 15, or macOS Monterey.
+![](https://cdn.macstories.net/cleanshot-2022-01-21-at-5-39-50-2x-1642783463880.png)
+
+The plugin **requires iOS 15, iPadOS 15, or macOS Monterey**.
 
 ## Installing Obsidian Shortcut Launcher 
 
-You can find the plugin in Obsidian's Community Plugins section. Just search for 'Obsidian Shortcut Launcher', install it, then enable the plugin to start using it in Obsidian.
+You can find the plugin in **Obsidian's Community Plugins** section. Just search for 'Obsidian Shortcut Launcher', install it, then enable the plugin to start using it in Obsidian.
 
 ## Creating Launchers for Shortcuts
 
@@ -24,21 +26,19 @@ You can create a new launcher for Shortcuts in OSL's settings by tapping the 'Ne
 * **Shortcut Name**: The exact name of the shortcut you want to launch in Shortcuts app.
 * **Input Type**: The input you want to pass from Obsidian to the Shortcuts app. See next section for more details.
 
-## Passing Values from Obsidian
+## Passing Input Values from Obsidian
 
 ![](https://cdn.macstories.net/cleanshot-2022-01-21-at-5-47-57-2x-1642783800591.png)
 
-Obsidian Shortcut Launcher lets you run shortcuts with input text passed by Obsidian. There are seven different input types you can pass from Obsidian to Shortcuts:
+Obsidian Shortcut Launcher lets you run shortcuts with input text sent by Obsidian. There are seven different input types you can pass from Obsidian to Shortcuts:
 
 * **Selected Text**: The current text selection from Obsidian.
-* **Selected Link/Embed Contents**: The contents of the file referenced in an [[internal link]] under the cursor. If the internal link points to a note, the full text of the note will be passed to Shortcuts as input; if the internal link points to an attachment (e.g. an image), the file will be encoded with base64 first and passed to Shortcuts as base64-encoded text. (Not available in Reading mode.)
 * **Current Paragraph**: The text of the paragraph the cursor is currently in. (Not available in Reading mode.)
 * **Entire Document**: The entire text of the current document.
 * **Link to Document**: The Obsidian URL to the current document.
 * **Document Name**: The name of the current document, without file extension.
 * **Document Path**: The relative path to the current document in your Obsidian vault.
-
-(Please note: the Current Paragraph and Embed Contents values are only supported when Obsidian is in Editing/Live Preview mode.)
+* **Selected Link/Embed Contents**: The contents of the file referenced in an [[internal link]] under the cursor. If the internal link points to a note, the full text of the note will be passed to Shortcuts as input; if the internal link points to an attachment (e.g. an image), the file will be encoded with base64 first and passed to Shortcuts as base64-encoded text. (Not available in Reading mode.)
 
 Here is an example of an Obsidian command that has passed the name of the current document to a shortcut in the Shortcuts app:
 
@@ -46,7 +46,7 @@ Here is an example of an Obsidian command that has passed the name of the curren
 
 And here is how you can receive attachments from Obsidian and decode them using base64 in Shortcuts:
 
----SEND ATTACHMENT HERE
+![](https://cdn.macstories.net/cleanshot-2022-01-26-at-12-03-47-2x-1643195055516.png)
 
 ## Passing Multiple Values with Custom Separators
 
@@ -54,7 +54,7 @@ OSL also features a 'Multiple' option that lets you pass *multiple* values at on
 
 By default, the separator character is `,` (a comma), but you can change it to be whatever you want. To access multiple input values in Shortcuts, use the 'Split Text' action and enter a value for the Custom Separator.
 
----PASS MULTIPLE OPTIONS
+![](https://cdn.macstories.net/cleanshot-2022-01-26-at-12-05-11-2x-1643195145281.png)
 
 ## Running Shortcuts with Input from Obsidian
 
