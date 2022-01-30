@@ -145,7 +145,7 @@ export class LauncherModal extends Modal {
 				.setDesc("The separator to insert between input types.")
 				.addText((text) =>
 					text
-						.setValue(",")
+						.setValue(this.separator)
 						.onChange((value) => (this.separator = value))
 				);
 		}
