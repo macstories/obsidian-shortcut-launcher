@@ -1,6 +1,6 @@
 {
   "name": "obsidian-shortcut-launcher",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Obsidian Shortcut Launcher",
   "main": "main.js",
   "scripts": {
