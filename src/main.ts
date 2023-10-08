@@ -206,6 +206,14 @@ export default class ShortcutLauncherPlugin extends Plugin {
 											)
 											.map((file) => file[0]);
 									text = filesLinkingToActiveFile.join("\n");
+								} else if (inputType == "YAML Frontmatter") {
+									let metadataCache =
+										this.app.metadataCache.getFileCache(
+											this.app.workspace.getActiveFile()!
+										);
+									let frontMatter =
+										metadataCache?.frontmatter ?? {};
+									text = JSON.stringify(frontMatter);
 								}
 								inputs.push(text);
 							}, Promise.resolve())
@@ -302,7 +310,8 @@ export default class ShortcutLauncherPlugin extends Plugin {
 			launcher.inputTypes.contains("Entire Document") ||
 			launcher.inputTypes.contains("Link to Document") ||
 			launcher.inputTypes.contains("Document Name") ||
-			launcher.inputTypes.contains("Document Path")
+			launcher.inputTypes.contains("Document Path") ||
+			launcher.inputTypes.contains("YAML Frontmatter")
 		) {
 			if (!this.app.workspace.getActiveFile()) {
 				return false;

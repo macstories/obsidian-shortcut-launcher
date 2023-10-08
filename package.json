@@ -6,7 +6,8 @@
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-		"version": "node version-bump.mjs && git add manifest.json versions.json"
+		"version": "node version-bump.mjs && git add manifest.json versions.json",
+		"bundle": "npm run build && mkdir -p dist && zip dist/obsidian-export-markdown-with-embeds.zip main.js versions.json manifest.json"
 	},
 	"keywords": [],
 	"author": "",

@@ -81,6 +81,7 @@ export class LauncherModal extends Modal {
 						"Document Name": "Document Name",
 						"Document Path": "Document Path",
 						"Backlinks to Document": "Backlinks to Document",
+						"YAML Frontmatter": "YAML Frontmatter",
 						Multiple: "Multiple",
 					})
 					.setValue(this.inputTypes[0])
@@ -117,6 +118,7 @@ export class LauncherModal extends Modal {
 									"Document Path": "Document Path",
 									"Backlinks to Document":
 										"Backlinks to Document",
+									"YAML Frontmatter": "YAML Frontmatter",
 								})
 								.setValue(inputType)
 								.onChange((value) => {
