@@ -80,6 +80,7 @@ export class LauncherModal extends Modal {
 						"Link to Document": "Link to Document",
 						"Document Name": "Document Name",
 						"Document Path": "Document Path",
+						"Backlinks to Document": "Backlinks to Document",
 						Multiple: "Multiple",
 					})
 					.setValue(this.inputTypes[0])
@@ -114,6 +115,8 @@ export class LauncherModal extends Modal {
 									"Link to Document": "Link to Document",
 									"Document Name": "Document Name",
 									"Document Path": "Document Path",
+									"Backlinks to Document":
+										"Backlinks to Document",
 								})
 								.setValue(inputType)
 								.onChange((value) => {

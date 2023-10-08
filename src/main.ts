@@ -65,30 +65,28 @@ export default class ShortcutLauncherPlugin extends Plugin {
 								await promise;
 								var text = "";
 								if (inputType == "Selected Text") {
-									let view =
-										this.app.workspace.activeLeaf.view;
-									if (view.getSelection) {
-										text = view.getSelection();
-									}
+									text =
+										this.app.workspace.activeEditor?.editor?.getSelection() ||
+										"";
 								} else if (
 									inputType == "Selected Link/Embed Contents"
 								) {
 									let metadataCache =
 										this.app.metadataCache.getFileCache(
-											this.app.workspace.getActiveFile()
+											this.app.workspace.getActiveFile()!
 										);
 
 									let linksAndEmbeds = (
-										(metadataCache.links ??
+										(metadataCache?.links ??
 											[]) as ReferenceCache[]
 									).concat(
-										(metadataCache.embeds ??
+										(metadataCache?.embeds ??
 											[]) as ReferenceCache[]
 									);
 									let mdView =
 										this.app.workspace.getActiveViewOfType(
 											MarkdownView
-										);
+										)!;
 									let cursorOffset =
 										mdView.editor.posToOffset(
 											mdView.editor.getCursor()
@@ -108,9 +106,9 @@ export default class ShortcutLauncherPlugin extends Plugin {
 										let linkedFile =
 											this.app.metadataCache.getFirstLinkpathDest(
 												linkpath,
-												this.app.workspace.getActiveFile()
+												this.app.workspace.getActiveFile()!
 													.path
-											);
+											)!;
 										if (
 											!matchingLinkOrEmbed[0].link.contains(
 												"."
@@ -136,9 +134,9 @@ export default class ShortcutLauncherPlugin extends Plugin {
 								} else if (inputType == "Current Paragraph") {
 									let metadataCache =
 										this.app.metadataCache.getFileCache(
-											this.app.workspace.getActiveFile()
+											this.app.workspace.getActiveFile()!
 										);
-									if (!metadataCache.sections) {
+									if (!metadataCache?.sections) {
 										new Notice(
 											"Could not find current paragraph"
 										);
@@ -146,28 +144,28 @@ export default class ShortcutLauncherPlugin extends Plugin {
 									let mdView =
 										this.app.workspace.getActiveViewOfType(
 											MarkdownView
-										);
+										)!;
 									let cursorOffset =
 										mdView.editor.posToOffset(
 											mdView.editor.getCursor()
 										);
 									let matchingSection =
-										metadataCache.sections.filter(
+										metadataCache?.sections?.filter(
 											(section) =>
 												section.position.start.offset <=
 													cursorOffset &&
 												section.position.end.offset >=
 													cursorOffset
 										);
-									if (matchingSection.length > 0) {
+									if ((matchingSection?.length || 0) > 0) {
 										let documentContents =
 											await this.app.vault.read(
-												this.app.workspace.getActiveFile()
+												this.app.workspace.getActiveFile()!
 											);
 										text = documentContents.substring(
-											matchingSection[0].position.start
+											matchingSection![0].position.start
 												.offset,
-											matchingSection[0].position.end
+											matchingSection![0].position.end
 												.offset
 										);
 									} else {
@@ -177,21 +175,37 @@ export default class ShortcutLauncherPlugin extends Plugin {
 									}
 								} else if (inputType == "Entire Document") {
 									text = await this.app.vault.read(
-										this.app.workspace.getActiveFile()
+										this.app.workspace.getActiveFile()!
 									);
 								} else if (inputType == "Link to Document") {
 									text = `obsidian://open?vault=${encodeURIComponent(
 										this.app.vault.getName()
 									)}&file=${encodeURIComponent(
-										this.app.workspace.getActiveFile().path
+										this.app.workspace.getActiveFile()!.path
 									)}`;
 								} else if (inputType == "Document Name") {
 									text =
-										this.app.workspace.getActiveFile()
+										this.app.workspace.getActiveFile()!
 											.basename;
 								} else if (inputType == "Document Path") {
 									text =
-										this.app.workspace.getActiveFile().path;
+										this.app.workspace.getActiveFile()!
+											.path;
+								} else if (
+									inputType == "Backlinks to Document"
+								) {
+									const filesLinkingToActiveFile =
+										Object.entries(
+											this.app.metadataCache.resolvedLinks
+										)
+											.filter((file) =>
+												Object.keys(file[1]).contains(
+													this.app.workspace.getActiveFile()!
+														.path
+												)
+											)
+											.map((file) => file[0]);
+									text = filesLinkingToActiveFile.join("\n");
 								}
 								inputs.push(text);
 							}, Promise.resolve())
@@ -241,19 +255,24 @@ export default class ShortcutLauncherPlugin extends Plugin {
 
 	check(launcher: Launcher): boolean {
 		if (launcher.inputTypes.contains("Selected Text")) {
-			let view = this.app.workspace.activeLeaf.view;
-			if (!view.getSelection) {
-				return false;
-			}
+			return (
+				(this.app.workspace.activeEditor?.editor?.getSelection()
+					.length || 0) > 0
+			);
 		}
 		if (launcher.inputTypes.contains("Selected Link/Embed Contents")) {
 			let mdView = this.app.workspace.getActiveViewOfType(MarkdownView);
 			if (!mdView || mdView.getMode() !== "source") {
 				return false;
 			}
-			let metadataCache = this.app.metadataCache.getFileCache(
-				this.app.workspace.getActiveFile()
-			);
+			let activeFile = this.app.workspace.getActiveFile();
+			if (!activeFile) {
+				return false;
+			}
+			let metadataCache = this.app.metadataCache.getFileCache(activeFile);
+			if (!metadataCache) {
+				return false;
+			}
 
 			let linksAndEmbeds = (
 				(metadataCache.links ?? []) as ReferenceCache[]

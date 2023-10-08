@@ -1,26 +1,24 @@
 {
-  "name": "obsidian-shortcut-launcher",
-  "version": "1.0.1",
-  "description": "Obsidian Shortcut Launcher",
-  "main": "main.js",
-  "scripts": {
-    "dev": "node esbuild.config.mjs",
-    "build": "node esbuild.config.mjs production",
-    "copy": "npm run build && cp ./{main.js,versions.json,manifest.json} ~/Library/Mobile\\ Documents/iCloud~md~obsidian/Documents/Notes/.obsidian/plugins/obsidian-shortcut-launcher-build/",
-    "clear": "rm ~/Library/Mobile\\ Documents/iCloud~md~obsidian/Documents/Notes/.obsidian/plugins/obsidian-shortcut-launcher-build/*",
-    "zip": "npm run build && zip obsidian-shortcut-launcher.zip main.js versions.json manifest.json"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "MIT",
-  "devDependencies": {
-    "@types/node": "^16.11.6",
-    "@typescript-eslint/eslint-plugin": "^5.2.0",
-    "@typescript-eslint/parser": "^5.2.0",
-    "builtin-modules": "^3.2.0",
-    "esbuild": "0.13.12",
-    "obsidian": "^0.12.17",
-    "tslib": "2.3.1",
-    "typescript": "4.4.4"
-  }
+	"name": "obsidian-shortcut-launcher",
+	"version": "1.0.1",
+	"description": "Obsidian Shortcut Launcher",
+	"main": "src/main.js",
+	"scripts": {
+		"dev": "node esbuild.config.mjs",
+		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"version": "node version-bump.mjs && git add manifest.json versions.json"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/node": "^16.11.6",
+		"@typescript-eslint/eslint-plugin": "5.29.0",
+		"@typescript-eslint/parser": "5.29.0",
+		"builtin-modules": "3.3.0",
+		"esbuild": "0.17.3",
+		"obsidian": "latest",
+		"tslib": "2.4.0",
+		"typescript": "4.7.4"
+	}
 }
