@@ -103,7 +103,7 @@ export class LauncherModal extends Modal {
 			this.inputTypes
 				.filter((_, index) => index > 0)
 				.forEach((inputType, index) => {
-					let setting = new Setting(contentEl)
+					const setting = new Setting(contentEl)
 						.setName(`Input Type #${index + 1}`)
 						.addDropdown((dropdown) =>
 							dropdown
