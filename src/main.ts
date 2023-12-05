@@ -1,3 +1,4 @@
+import * as obsidian from 'obsidian';
 import {
 	Command,
 	getLinkpath,
@@ -8,6 +9,8 @@ import {
 	ReferenceCache,
 } from "obsidian";
 import { SettingsTab } from "./SettingsTab";
+
+const pluginCallbackPath = 'obsidian-shortcut-launcher';
 
 declare module "obsidian" {
 	interface Commands {
@@ -39,11 +42,35 @@ const DEFAULT_SETTINGS: ShortcutLauncherPluginSettings = {
 export default class ShortcutLauncherPlugin extends Plugin {
 	settings: ShortcutLauncherPluginSettings;
 	registeredCommands: Command[] = [];
+	private lastLauncher;
+	private statusBarIcon;
 
 	async onload() {
 		await this.loadSettings();
 		this.addSettingTab(new SettingsTab(this.app, this));
 		await this.createCommands();
+		this.registerCallbacks()
+	}
+
+	registerCallbacks() {
+		// Register the callback handlers
+        this.registerObsidianProtocolHandler(`${pluginCallbackPath}/success`, async (params) => {
+            // Handle the success response from the iOS Shortcut
+            // console.log(`Shortcut success:`, params);
+            this.handleShortcutResponse(params.result, this.lastLauncher)
+            this.lastLauncher = undefined;
+            this.hideStatusBarIcon()
+        });
+
+        this.registerObsidianProtocolHandler(`${pluginCallbackPath}/error`, async (params) => {
+            // Handle the error response from the iOS Shortcut
+            console.error(`Shortcut error:`, params);
+            this.lastLauncher = undefined;
+            this.hideStatusBarIcon()
+            new Notice(
+				`There was an error running your shortcut`
+			);
+        });
 	}
 
 	async createCommands() {
@@ -68,9 +95,7 @@ export default class ShortcutLauncherPlugin extends Plugin {
 									text =
 										this.app.workspace.activeEditor?.editor?.getSelection() ||
 										"";
-								} else if (
-									inputType == "Selected Link/Embed Contents"
-								) {
+								} else if (inputType == "Selected Link/Embed Contents") {
 									let metadataCache =
 										this.app.metadataCache.getFileCache(
 											this.app.workspace.getActiveFile()!
@@ -218,40 +243,55 @@ export default class ShortcutLauncherPlugin extends Plugin {
 								inputs.push(text);
 							}, Promise.resolve())
 							.then(() => {
+								this.showStatusBarIcon(launcher)
 								if (Platform.isMobileApp) {
-									window.open(
-										`shortcuts://run-shortcut?name=${encodeURIComponent(
-											launcher.shortcutName
-										)}&input=text&text=${encodeURIComponent(
-											inputs.join(launcher.separator)
-										)}`
-									);
+								    // Define the base URL for the Actions URI plugin
+							        const actionsUriBase = 'obsidian://';
+
+							        // Construct the x-success and x-error URLs
+							        const xSuccessURL = launcher.insertShortcutText ? `${actionsUriBase}obsidian-shortcut-launcher/success` : '';
+							        const xErrorURL = `${actionsUriBase}${pluginCallbackPath}/error`;
+
+							        // Encode the URLs for inclusion in the Shortcut URL
+							        const encodedXSuccessURL = encodeURIComponent(xSuccessURL);
+							        const encodedXErrorURL = encodeURIComponent(xErrorURL);
+
+							        // Construct the URL to call the iOS Shortcut
+							        const url = `shortcuts://run-shortcut?name=${encodeURIComponent(
+							            launcher.shortcutName
+							        )}&input=text&text=${encodeURIComponent(
+							            inputs.join(launcher.separator)
+							        )}&x-success=${encodedXSuccessURL}&x-error=${encodedXErrorURL}`;
+							        this.lastLauncher = launcher;
+							        // Open the Shortcut URL
+							        window.open(url);
 								} else {
-									let tempFilePath = require("path").join(
-										require("os").tmpdir(),
-										"obsidian-shortcut-launcher-temp-input"
-									);
 									let escapedShortcutName =
 										launcher.shortcutName.replace(
 											/["\\]/g,
 											"\\$&"
 										);
-									let fs = require("fs");
-									fs.writeFile(
-										tempFilePath,
-										inputs.join(launcher.separator),
-										() => {
-											require("child_process").exec(
-												`shortcuts run "${escapedShortcutName}" -i ${tempFilePath}`,
-												async () => {
-													fs.unlink(
-														tempFilePath,
-														() => {}
-													);
-												}
-											);
-										}
-									);
+									const child = require("child_process").exec(
+							            `echo "${inputs.join(launcher.separator).replace(/"/g, '\\"')}" | shortcuts run "${escapedShortcutName}"`,
+							            (error, stdout, stderr) => {
+							                if (error) {
+							                    console.error(`exec error: ${error}`);
+							                    new Notice(
+													`There was an error running your shortcut`
+												);
+							                    return;
+							                }
+							                if (stderr) {
+							                    console.error(`stderr: ${stderr}`);
+							                    new Notice(
+													`There was an error running your shortcut`
+												);
+							                    return;
+							                }
+							                this.hideStatusBarIcon()
+							                this.handleShortcutResponse(stdout, launcher);
+							            }
+							        );
 								}
 							});
 						return true;
@@ -259,6 +299,59 @@ export default class ShortcutLauncherPlugin extends Plugin {
 				})
 			);
 		});
+	}
+
+	handleShortcutResponse(output, launcher) {
+	    // Check if the setting to insert text is enabled
+	    console.log(`shortcut responded with ${output}`);
+
+	    if (!launcher.insertShortcutText) {
+	        // If the setting is not enabled, simply log and return without inserting
+	        console.log('Inserting text from shortcut is disabled.');
+	        return;
+	    }
+
+	    // Get the active leaf (pane) in Obsidian
+	    const activeLeaf = app.workspace.activeLeaf;
+
+	    // Check if the active leaf has an editor instance
+	    if (activeLeaf && activeLeaf.view instanceof obsidian.MarkdownView) {
+	        const editor = activeLeaf.view.editor;
+	        const doc = editor.getDoc();
+
+	        // Prepare the text to be inserted, including the launcher's command name
+	        const textToInsert = `\n**${launcher.commandName}**: ${output}\n`;
+
+	        // Get the current cursor position
+	        const cursorPos = doc.getCursor();
+
+	        // Insert the text right after the current cursor position
+	        doc.replaceRange(textToInsert, cursorPos);
+
+	        // Move the cursor to the end of the inserted text
+	        // Since we've inserted text, calculate the new cursor position
+	        const linesInserted = textToInsert.split('\n').length - 1;
+	        const newCursorPos = {
+	            line: cursorPos.line + linesInserted,
+	            ch: linesInserted > 0 ? 0 : cursorPos.ch + textToInsert.length
+	        };
+	        doc.setCursor(newCursorPos);
+	    }
+	}
+
+	showStatusBarIcon(launcher) {
+	    // Get the status bar element
+	    this.statusBarIcon = this.addStatusBarItem()
+	    this.statusBarIcon.setText(`Running Shortcut: ${launcher.commandName}...`)
+	    // app.workspace.statusBarEl.createEl('div', { text: `Running Shortcut: ${launcher.commandName}...` });
+	}
+
+	hideStatusBarIcon() {
+	    // Remove the status bar item if it exists
+	    if (this.statusBarIcon) {
+	        this.statusBarIcon.remove();
+	        this.statusBarIcon = null;
+	    }
 	}
 
 	check(launcher: Launcher): boolean {

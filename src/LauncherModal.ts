@@ -6,12 +6,14 @@ export class LauncherModal extends Modal {
 	shortcutName: string;
 	inputTypes: string[];
 	separator: string;
+	insertShortcutText: boolean;
 
 	onSave: (
 		commandName: string,
 		shortcutName: string,
 		inputTypes: string[],
-		separator: string
+		separator: string,
+		insertShortcutText: boolean,
 	) => void;
 
 	constructor(
@@ -21,11 +23,13 @@ export class LauncherModal extends Modal {
 		shortcutName: string,
 		inputTypes: string[],
 		separator: string,
+		insertShortcutText: boolean,
 		onSave: (
 			commandName: string,
 			shortcutName: string,
 			inputTypes: string[],
-			separator: string
+			separator: string,
+			insertShortcutText: boolean,
 		) => void
 	) {
 		super(app);
@@ -34,6 +38,7 @@ export class LauncherModal extends Modal {
 		this.shortcutName = shortcutName;
 		this.inputTypes = inputTypes;
 		this.separator = separator;
+		this.insertShortcutText = insertShortcutText;
 		this.onSave = onSave;
 	}
 
@@ -155,26 +160,39 @@ export class LauncherModal extends Modal {
 				);
 		}
 
-		new Setting(contentEl).addButton((button) =>
-			button
-				.setButtonText("Save")
-				.setCta()
-				.onClick(() => {
-					if (!this.commandName || this.commandName.length == 0) {
-						return new Notice("Specify a command name.");
-					}
-					if (!this.shortcutName || this.shortcutName.length == 0) {
-						return new Notice("Specify a shortcut name.");
-					}
-					this.onSave(
-						this.commandName,
-						this.shortcutName,
-						this.inputTypes,
-						this.separator
-					);
-					this.close();
-				})
-		);
+		new Setting(contentEl)
+			.setName("Insert shortcut text")
+			.setDesc("Insert the response from the shortcut after the cursor or selected text.")
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.insertShortcutText)
+					.onChange((value) => {
+						(this.insertShortcutText = value)
+					})
+			);
+
+		new Setting(contentEl)
+			.addButton((button) =>
+				button
+					.setButtonText("Save")
+					.setCta()
+					.onClick(() => {
+						if (!this.commandName || this.commandName.length == 0) {
+							return new Notice("Specify a command name.");
+						}
+						if (!this.shortcutName || this.shortcutName.length == 0) {
+							return new Notice("Specify a shortcut name.");
+						}
+						this.onSave(
+							this.commandName,
+							this.shortcutName,
+							this.inputTypes,
+							this.separator,
+							this.insertShortcutText
+						);
+						this.close();
+					})
+			);
 	}
 
 	onClose() {

@@ -29,12 +29,14 @@ export class SettingsTab extends PluginSettingTab {
 						"",
 						["Selected Text"],
 						",",
-						(commandName, shortcutName, inputTypes, separator) => {
+						false,
+						(commandName, shortcutName, inputTypes, separator, insertShortcutText) => {
 							this.plugin.settings.launchers.splice(0, 0, {
-								commandName: commandName,
-								shortcutName: shortcutName,
-								inputTypes: inputTypes,
-								separator: separator,
+								commandName,
+								shortcutName,
+								inputTypes,
+								separator,
+								insertShortcutText,
 							});
 							this.plugin.saveSettings();
 							this.display();
@@ -56,11 +58,13 @@ export class SettingsTab extends PluginSettingTab {
 							launcher.shortcutName,
 							launcher.inputTypes,
 							launcher.separator,
+							launcher.insertShortcutText,
 							(
 								commandName,
 								shortcutName,
 								inputTypes,
-								separator
+								separator,
+								insertShortcutText,
 							) => {
 								this.plugin.settings.launchers[
 									index
@@ -74,6 +78,9 @@ export class SettingsTab extends PluginSettingTab {
 								this.plugin.settings.launchers[
 									index
 								].separator = separator;
+								this.plugin.settings.launchers[
+									index
+								].insertShortcutText = insertShortcutText;
 								this.plugin.saveSettings();
 								this.display();
 							}
