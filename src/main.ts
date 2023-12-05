@@ -68,7 +68,7 @@ export default class ShortcutLauncherPlugin extends Plugin {
             this.lastLauncher = undefined;
             this.hideStatusBarIcon()
             new Notice(
-				`There was an error running your shortcut: ${perams}`
+				`There was an error running your shortcut`
 			);
         });
 	}
@@ -276,10 +276,16 @@ export default class ShortcutLauncherPlugin extends Plugin {
 							            (error, stdout, stderr) => {
 							                if (error) {
 							                    console.error(`exec error: ${error}`);
+							                    new Notice(
+													`There was an error running your shortcut`
+												);
 							                    return;
 							                }
 							                if (stderr) {
 							                    console.error(`stderr: ${stderr}`);
+							                    new Notice(
+													`There was an error running your shortcut`
+												);
 							                    return;
 							                }
 							                this.hideStatusBarIcon()
