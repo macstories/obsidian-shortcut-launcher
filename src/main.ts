@@ -57,13 +57,13 @@ export default class ShortcutLauncherPlugin extends Plugin {
 						if (checking) {
 							return this.check(launcher);
 						}
-						var inputs: string[] = [];
+						const inputs: string[] = [];
 
 						launcher.inputTypes
 							.filter((inputType) => inputType != "Multiple")
 							.reduce(async (promise, inputType) => {
 								await promise;
-								var text = "";
+								let text = "";
 								if (inputType == "Selected Text") {
 									text =
 										this.app.workspace.activeEditor?.editor?.getSelection() ||
@@ -71,27 +71,27 @@ export default class ShortcutLauncherPlugin extends Plugin {
 								} else if (
 									inputType == "Selected Link/Embed Contents"
 								) {
-									let metadataCache =
+									const metadataCache =
 										this.app.metadataCache.getFileCache(
 											this.app.workspace.getActiveFile()!
 										);
 
-									let linksAndEmbeds = (
+									const linksAndEmbeds = (
 										(metadataCache?.links ??
 											[]) as ReferenceCache[]
 									).concat(
 										(metadataCache?.embeds ??
 											[]) as ReferenceCache[]
 									);
-									let mdView =
+									const mdView =
 										this.app.workspace.getActiveViewOfType(
 											MarkdownView
 										)!;
-									let cursorOffset =
+									const cursorOffset =
 										mdView.editor.posToOffset(
 											mdView.editor.getCursor()
 										);
-									let matchingLinkOrEmbed =
+									const matchingLinkOrEmbed =
 										linksAndEmbeds.filter(
 											(cached) =>
 												cached.position.start.offset <=
@@ -100,10 +100,10 @@ export default class ShortcutLauncherPlugin extends Plugin {
 													cursorOffset
 										);
 									if (matchingLinkOrEmbed.length > 0) {
-										let linkpath = getLinkpath(
+										const linkpath = getLinkpath(
 											matchingLinkOrEmbed[0].link
 										);
-										let linkedFile =
+										const linkedFile =
 											this.app.metadataCache.getFirstLinkpathDest(
 												linkpath,
 												this.app.workspace.getActiveFile()!
@@ -120,7 +120,7 @@ export default class ShortcutLauncherPlugin extends Plugin {
 												linkedFile
 											);
 										} else {
-											let binary =
+											const binary =
 												await this.app.vault.readBinary(
 													linkedFile
 												);
@@ -132,7 +132,7 @@ export default class ShortcutLauncherPlugin extends Plugin {
 										);
 									}
 								} else if (inputType == "Current Paragraph") {
-									let metadataCache =
+									const metadataCache =
 										this.app.metadataCache.getFileCache(
 											this.app.workspace.getActiveFile()!
 										);
@@ -141,15 +141,15 @@ export default class ShortcutLauncherPlugin extends Plugin {
 											"Could not find current paragraph"
 										);
 									}
-									let mdView =
+									const mdView =
 										this.app.workspace.getActiveViewOfType(
 											MarkdownView
 										)!;
-									let cursorOffset =
+									const cursorOffset =
 										mdView.editor.posToOffset(
 											mdView.editor.getCursor()
 										);
-									let matchingSection =
+									const matchingSection =
 										metadataCache?.sections?.filter(
 											(section) =>
 												section.position.start.offset <=
@@ -158,7 +158,7 @@ export default class ShortcutLauncherPlugin extends Plugin {
 													cursorOffset
 										);
 									if ((matchingSection?.length || 0) > 0) {
-										let documentContents =
+										const documentContents =
 											await this.app.vault.read(
 												this.app.workspace.getActiveFile()!
 											);
@@ -206,12 +206,12 @@ export default class ShortcutLauncherPlugin extends Plugin {
 											)
 											.map((file) => file[0]);
 									text = filesLinkingToActiveFile.join("\n");
-								} else if (inputType == "YAML Frontmatter") {
-									let metadataCache =
+								} else if (inputType == "Properties") {
+									const metadataCache =
 										this.app.metadataCache.getFileCache(
 											this.app.workspace.getActiveFile()!
 										);
-									let frontMatter =
+									const frontMatter =
 										metadataCache?.frontmatter ?? {};
 									text = JSON.stringify(frontMatter);
 								}
@@ -227,16 +227,16 @@ export default class ShortcutLauncherPlugin extends Plugin {
 										)}`
 									);
 								} else {
-									let tempFilePath = require("path").join(
+									const tempFilePath = require("path").join(
 										require("os").tmpdir(),
 										"obsidian-shortcut-launcher-temp-input"
 									);
-									let escapedShortcutName =
+									const escapedShortcutName =
 										launcher.shortcutName.replace(
 											/["\\]/g,
 											"\\$&"
 										);
-									let fs = require("fs");
+									const fs = require("fs");
 									fs.writeFile(
 										tempFilePath,
 										inputs.join(launcher.separator),
@@ -269,29 +269,30 @@ export default class ShortcutLauncherPlugin extends Plugin {
 			);
 		}
 		if (launcher.inputTypes.contains("Selected Link/Embed Contents")) {
-			let mdView = this.app.workspace.getActiveViewOfType(MarkdownView);
+			const mdView = this.app.workspace.getActiveViewOfType(MarkdownView);
 			if (!mdView || mdView.getMode() !== "source") {
 				return false;
 			}
-			let activeFile = this.app.workspace.getActiveFile();
+			const activeFile = this.app.workspace.getActiveFile();
 			if (!activeFile) {
 				return false;
 			}
-			let metadataCache = this.app.metadataCache.getFileCache(activeFile);
+			const metadataCache =
+				this.app.metadataCache.getFileCache(activeFile);
 			if (!metadataCache) {
 				return false;
 			}
 
-			let linksAndEmbeds = (
+			const linksAndEmbeds = (
 				(metadataCache.links ?? []) as ReferenceCache[]
 			).concat((metadataCache.embeds ?? []) as ReferenceCache[]);
 			if (typeof mdView.editor == "undefined") {
 				return false;
 			}
-			let cursorOffset = mdView.editor.posToOffset(
+			const cursorOffset = mdView.editor.posToOffset(
 				mdView.editor.getCursor()
 			);
-			let matchingLinkOrEmbed = linksAndEmbeds.filter(
+			const matchingLinkOrEmbed = linksAndEmbeds.filter(
 				(cached) =>
 					cached.position.start.offset <= cursorOffset &&
 					cached.position.end.offset >= cursorOffset
@@ -301,7 +302,7 @@ export default class ShortcutLauncherPlugin extends Plugin {
 			}
 		}
 		if (launcher.inputTypes.contains("Current Paragraph")) {
-			let mdView = this.app.workspace.getActiveViewOfType(MarkdownView);
+			const mdView = this.app.workspace.getActiveViewOfType(MarkdownView);
 			if (!mdView || mdView.getMode() !== "source") {
 				return false;
 			}
@@ -311,7 +312,7 @@ export default class ShortcutLauncherPlugin extends Plugin {
 			launcher.inputTypes.contains("Link to Document") ||
 			launcher.inputTypes.contains("Document Name") ||
 			launcher.inputTypes.contains("Document Path") ||
-			launcher.inputTypes.contains("YAML Frontmatter")
+			launcher.inputTypes.contains("Properties")
 		) {
 			if (!this.app.workspace.getActiveFile()) {
 				return false;
@@ -342,10 +343,10 @@ export default class ShortcutLauncherPlugin extends Plugin {
 
 // https://stackoverflow.com/a/9458996/4927033
 function arrayBufferToBase64(buffer: ArrayBuffer) {
-	var binary = "";
-	var bytes = new Uint8Array(buffer);
-	var len = bytes.byteLength;
-	for (var i = 0; i < len; i++) {
+	let binary = "";
+	const bytes = new Uint8Array(buffer);
+	const len = bytes.byteLength;
+	for (let i = 0; i < len; i++) {
 		binary += String.fromCharCode(bytes[i]);
 	}
 	return window.btoa(binary);

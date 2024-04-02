@@ -39,6 +39,7 @@ Obsidian Shortcut Launcher lets you run shortcuts with input text sent by Obsidi
 * **Document Name**: The name of the current document, without file extension.
 * **Document Path**: The relative path to the current document in your Obsidian vault.
 * **Selected Link/Embed Contents**: The contents of the file referenced in an [[internal link]] under the cursor. If the internal link points to a note, the full text of the note will be passed to Shortcuts as input; if the internal link points to an attachment (e.g. an image), the file will be encoded with base64 first and passed to Shortcuts as base64-encoded text. (Not available in Reading mode.)
+* **Properties**: The [Properties](https://help.obsidian.md/Editing+and+formatting/Properties) of the current document as JSON.
 
 Here is an example of an Obsidian command that has passed the name of the current document to a shortcut in the Shortcuts app:
 
